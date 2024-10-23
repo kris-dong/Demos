@@ -34,3 +34,10 @@ _isaac_sim*
 _repo
 _build
 .lastformat
+
+# Project-specific
+checkpoints/*
+!checkpoints/README.md
+
+shared/*
+!shared/README.md
