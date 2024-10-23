@@ -53,6 +53,8 @@ from omni.isaac.lab_tasks.utils.wrappers.rsl_rl import (
 # Import extensions to set up environment tasks
 import g1_demos.tasks  # noqa: F401
 
+from g1_demos.tasks.end2end.banana.banana_perception import Perception
+
 
 def main():
     """Play with RSL-RL agent."""
@@ -107,8 +109,19 @@ def main():
         ppo_runner.alg.actor_critic, normalizer=ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.onnx"
     )
 
-    cv2.namedWindow("Depth", cv2.WINDOW_NORMAL)
-    cv2.namedWindow("RGB", cv2.WINDOW_NORMAL)
+
+    depth_model = "vits"
+    depth_input_size = 518
+    yolo_model = "yolo11l"
+    
+    device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    
+    # create the model
+    perception_model = Perception(depth_model=depth_model, depth_input_size=depth_input_size, yolo_model=yolo_model, device=device, visualize=True)
+
+
+    # cv2.namedWindow("Isaac RGB", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("Isaac Depth", cv2.WINDOW_NORMAL)
 
     camera = env.unwrapped.scene.sensors["camera"]
 
@@ -118,11 +131,12 @@ def main():
     # simulate environment
     while simulation_app.is_running():
         # run everything in inference mode
-        with torch.inference_mode():
-            # agent stepping
-            actions = policy(obs)
-            # env stepping
-            obs, _, _, _ = env.step(actions)
+        # with torch.inference_mode():
+        # agent stepping
+        actions = policy(obs)
+        # env stepping
+        obs, _, _, _ = env.step(actions)
+        
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
@@ -130,12 +144,21 @@ def main():
                 break
         
 
-        # visualize camera images
+        # retrieve images from camera
         rgb_img = camera.data.output["rgb"]
         depth_img = camera.data.output["depth"]
-        
-        rgb_img = rgb_img[0].cpu().numpy().astype(np.uint8)
+        # convert from torch tensor to numpy array
+        rgb_img = rgb_img[0].cpu().numpy()
         depth_img = depth_img[0].cpu().numpy()
+
+        goal = perception_model.forward(rgb_img)
+
+        observation_command_index = 9
+        obs[:, observation_command_index:observation_command_index+3] = goal
+
+
+        # Visualize Isaac Images
+        depth_img = np.clip(depth_img, 0, 1e4)
         depth_img = (depth_img - depth_img.min()) / (depth_img.max() - depth_img.min())
         depth_img = (depth_img * 255).astype(np.uint8)
 
@@ -143,8 +166,8 @@ def main():
         rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
         depth_img = cv2.cvtColor(depth_img, cv2.COLOR_GRAY2BGR)
         
-        cv2.imshow("RGB", rgb_img)
-        cv2.imshow("Depth", depth_img)
+        # cv2.imshow("Isaac RGB", rgb_img)
+        cv2.imshow("Isaac Depth", depth_img)
         cv2.waitKey(1)
 
 
