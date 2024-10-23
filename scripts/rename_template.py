@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 """This script can be used to rename the template project to a new project name.
-It renames all the occurrences of g1_template (in files, directories, etc.) to the new project name.
+It renames all the occurrences of g1_demos (in files, directories, etc.) to the new project name.
 """
 
 
@@ -32,19 +32,19 @@ if __name__ == "__main__":
         sys.exit(1)
 
     root_dir_path = str(Path(__file__).resolve().parent.parent)
-    old_name = "g1_template"
+    old_name = "g1_demos"
     new_name = sys.argv[1]
 
     print(f"Warning, this script will rename all instances of '{old_name}' to '{new_name}' in {root_dir_path}.")
     proceed = input("Proceed? (y/n): ")
 
     if proceed.lower() == "y":
-        # rename the g1_template folder
+        # rename the g1_demos folder
         os.rename(
-            os.path.join(root_dir_path, "exts", "g1_template", "g1_template"),
-            os.path.join(root_dir_path, "exts", "g1_template", new_name),
+            os.path.join(root_dir_path, "exts", "g1_demos", "g1_demos"),
+            os.path.join(root_dir_path, "exts", "g1_demos", new_name),
         )
-        os.rename(os.path.join(root_dir_path, "exts", "g1_template"), os.path.join(root_dir_path, "exts", new_name))
+        os.rename(os.path.join(root_dir_path, "exts", "g1_demos"), os.path.join(root_dir_path, "exts", new_name))
         # rename the file contents
         rename_file_contents(root_dir_path, old_name, new_name, exclude_dirs=[".git"])
     else:
