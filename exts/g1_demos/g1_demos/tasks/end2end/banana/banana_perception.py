@@ -259,10 +259,10 @@ if __name__ == "__main__":
     depth_input_size = 518
     yolo_model = "yolo11l"
     
-    DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     
     # create the model
-    model = Perception(depth_model=depth_model, depth_input_size=depth_input_size, yolo_model=yolo_model, device=DEVICE, visualize=True)
+    model = Perception(depth_model=depth_model, depth_input_size=depth_input_size, yolo_model=yolo_model, device=device, visualize=True)
 
     # open the video source
     video_source = 0
