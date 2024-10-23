@@ -79,7 +79,7 @@ class MySceneCfg(InteractiveSceneCfg):
     room: AssetBaseCfg = AssetBaseCfg(
         prim_path="/World/room",
         spawn=sim_utils.UsdFileCfg(
-            usd_path="omniverse://localhost/NVIDIA/Assets/Isaac/4.2/Isaac/Environments/Digital_Twin_Warehouse/small_warehouse_digital_twin.usd"
+            usd_path=f"{ISAAC_NUCLEUS_DIR}/Environments/Digital_Twin_Warehouse/small_warehouse_digital_twin.usd"
         ),
     )
 
