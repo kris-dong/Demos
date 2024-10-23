@@ -1,7 +1,10 @@
 from omni.isaac.lab.managers import RewardTermCfg as RewTerm
 from omni.isaac.lab.managers import SceneEntityCfg
 from omni.isaac.lab.managers import TerminationTermCfg as DoneTerm
+from omni.isaac.lab.sensors import CameraCfg
 from omni.isaac.lab.utils import configclass
+from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR
+import omni.isaac.lab.sim as sim_utils
 
 import g1_demos.tasks.end2end.banana.mdp as mdp
 from g1_demos.tasks.end2end.banana.velocity_env_cfg import (
@@ -120,6 +123,20 @@ class G1EnvCfg(LocomotionVelocityRoughEnvCfg):
         super().__post_init__()
         # Scene
         self.scene.robot = G1_MINIMAL_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+
+        # Sensor
+        self.scene.camera = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/Robot/head_link/camera",
+            update_period=0.01,
+            height=600,
+            width=800,
+            data_types=["rgb", "depth"],
+            spawn=sim_utils.PinholeCameraCfg(
+                focal_length=12.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
+            ),
+            offset=CameraCfg.OffsetCfg(pos=(0.0, 0.0, 0.3), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+            # offset-z should be 0.5, but the debug arrow will block the view
+        )
 
         # change terrain to flat
         self.scene.terrain.terrain_type = "plane"
